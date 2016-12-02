@@ -8,83 +8,142 @@
         - randomly generating them more often;
 */
 
+// Constants
+var TILE_WIDTH = 100;
+var TILE_HEIGHT = 83;
+var X_START_LOC = 101 * 2;
+var Y_START_LOC = 83 * 5 - 30;
+var PLAYER_WIDTH = 64;
+var PLAYER_HEIGHT = 64;
+var BUG_WIDTH = 100;
+var BUG_HEIGHT = 65;
+
+
+// Math functions from Mozilla Developer Network
+function getRandomArbitrary(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+function getRandomIntInclusive(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+
+
 // Game object so to allow for scoring and levels. At a later point the game's state could be saved (TO DO).
 var Game = function() {
     this.level = 1; // Level number is also the difficulty parameter.
     this.score = 0;
 }
 
-Game.prototype.nextLevel = function() {
+Game.prototype.winLevel = function() {
     this.score += this.level;
     this.level++;
+    reset();
 }
 
 
 
-// Super class for all NPC's that move over the road.
-var Roadster = function() {};
+// Define super class objects in the game that have a position, can move and collide.
+var GameObject = function() {
+}
 
-// Roadsters start randomly at either one of three lanes on the y-axis.
-Roadster.prototype.startLane = function(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    var randRow = Math.floor(Math.random() * (max - min + 1)) + min;
-    return 83 * randRow - 20; // 83 is the height of a row.
+GameObject.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+
+    ctx.beginPath();
+    ctx.rect(this.x + this.xoffset, this.y + this.yoffset, this.width, this.height);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = 'red';
+    ctx.stroke();
 };
 
 
 
-// Enemies our player must avoid. A sub class of Roadster.
+// Super class for all objects that move over the road. A sub class of GameObject.
+var RoadRunner = function() {};
+
+RoadRunner.prototype = Object.create(GameObject.prototype);
+
+// RoadRunners start randomly at either one of three lanes on the y-axis.
+RoadRunner.prototype.startLane = function(min, max) {
+    var randRow = getRandomIntInclusive(min, max);
+    return TILE_HEIGHT * randRow - 20;
+};
+
+
+// Enemies our player must avoid. A sub class of RoadRunner.
 var Enemy = function() {
     this.x = -101;
     this.y = this.startLane(1, 3);
-    this.speed = (Math.random() + 0.25) * 250;
+    this.xoffset = 0;
+    this.yoffset = 80;
+    this.width = BUG_WIDTH;
+    this.height = BUG_HEIGHT;
+    this.speed = (getRandomIntInclusive(2,4) / 2) * 100;
     this.sprite = 'images/enemy-bug.png';
 };
 
-Enemy.prototype = Object.create(Roadster.prototype);
+Enemy.prototype = Object.create(RoadRunner.prototype);
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function(dt) {
+    this.checkCollision(player);
+
     this.x = this.x + (this.speed * dt);
+
+    // Remove instances of enemy from the game once out of sight
+    if (this.x > 100 * 4) {
+        var i = allEnemies.indexOf(this);
+        if(i != -1) {
+        	allEnemies.splice(i, 1);
+        }
+    }
+
 }
 
-// Draw the enemy on the screen, required method for game
-Enemy.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+Enemy.prototype.checkCollision = function(playerObj) {
+    if (playerObj.x < this.x + BUG_WIDTH &&
+        playerObj.x + PLAYER_WIDTH > this.x &&
+        playerObj.y < this.y + BUG_HEIGHT &&
+        PLAYER_HEIGHT + playerObj.y > this.y) {
+        //player.reset();
+        console.log("Collision!");
+    }
 };
 
+;
 
-
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
+// Player object
 var Player = function(x, y) {
     this.x = x;
     this.y = y;
+    this.xoffset = 20;
+    this.yoffset = 80;
+    this.width = PLAYER_WIDTH;
+    this.height = PLAYER_HEIGHT;
     this.sprite = 'images/char-boy.png';
 }
 
+Player.prototype = Object.create(GameObject.prototype);
 
 Player.prototype.update = function() {};
 
-Player.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-};
-
-Player.prototype.handleInput = function(direction) {
-    if (direction === 'up' && this.y > 0) {
-        this.y -= 83;
+Player.prototype.handleInput = function(input) {
+    if (input === 'up' && this.y > 0) {
+        this.y -= TILE_HEIGHT;
     }
-    if (direction === 'right' && this.x < 100 * 4) {
-        this.x += 100;
+    if (input === 'right' && this.x < TILE_WIDTH * 4) {
+        this.x += TILE_WIDTH;
     }
-    if (direction === 'down' && this.y < 83 * 4) {
-        this.y += 83;
+    if (input === 'down' && this.y < TILE_HEIGHT * 4) {
+        this.y += TILE_HEIGHT;
     }
-    if (direction === 'left' && this.x > 2) {
-        this.x -= 100;
+    if (input === 'left' && this.x > 2) {
+        this.x -= TILE_WIDTH;
     }
 };
 
@@ -93,21 +152,29 @@ Player.prototype.handleInput = function(direction) {
 // Instantiate objects.
 var allEnemies = [];
 
-var enemyGenerator = function() {
-    // var maxNumEnemies = 4;
+var enemy = allEnemies.push(new Enemy());
 
-    window.setInterval(newEnemyInstance, 1200);
+var enemyGenerator = function() {
+    var maxEnemyCount = 4;
+
+    window.setInterval(newEnemyInstance, 800);
 
     function newEnemyInstance() {
-        var enemy = {};
-        allEnemies.push(new Enemy());
+        if (allEnemies.length < maxEnemyCount) {
+            var enemy = new Enemy();
+            allEnemies.push(enemy);
+        }
     }
 
 };
 
 enemyGenerator();
 
-var player = new Player(101 * 2, 83 * 5 - 30);
+var player = new Player(X_START_LOC, Y_START_LOC);
+
+allEnemies.forEach(function(enemy) {
+    enemy.update(player);
+});
 
 
 
