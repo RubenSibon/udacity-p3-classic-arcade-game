@@ -28,8 +28,8 @@ var Roadster = function() {};
 Roadster.prototype.startLane = function(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
-    var randNum = Math.floor(Math.random() * (max - min + 1)) + min;
-    return 83 * randNum - 20; // 83 is the height of a row.
+    var randRow = Math.floor(Math.random() * (max - min + 1)) + min;
+    return 83 * randRow - 20; // 83 is the height of a row.
 };
 
 
@@ -38,7 +38,7 @@ Roadster.prototype.startLane = function(min, max) {
 var Enemy = function() {
     this.x = -101;
     this.y = this.startLane(1, 3);
-    this.speed = Math.random() * 500;
+    this.speed = (Math.random() + 0.25) * 250;
     this.sprite = 'images/enemy-bug.png';
 };
 
@@ -60,27 +60,54 @@ Enemy.prototype.render = function() {
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
-var Player = function() {
-
-    this.sprite = 'images/char-horn-girl.png';
+var Player = function(x, y) {
+    this.x = x;
+    this.y = y;
+    this.sprite = 'images/char-boy.png';
 }
 
-Player.prototype.update = function(dt) {};
+
+Player.prototype.update = function() {};
+
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
-Player.prototype.handleInput = function() {};
+
+Player.prototype.handleInput = function(direction) {
+    if (direction === 'up' && this.y > 0) {
+        this.y -= 83;
+    }
+    if (direction === 'right' && this.x < 100 * 4) {
+        this.x += 100;
+    }
+    if (direction === 'down' && this.y < 83 * 4) {
+        this.y += 83;
+    }
+    if (direction === 'left' && this.x > 2) {
+        this.x -= 100;
+    }
+};
 
 
 
-// Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
-// Place the player object in a variable called player
+// Instantiate objects.
 var allEnemies = [];
-var enemy = allEnemies.push(new Enemy());
 
-var player = new Player(300, 400);
-// player.render();
+var enemyGenerator = function() {
+    // var maxNumEnemies = 4;
+
+    window.setInterval(newEnemyInstance, 1200);
+
+    function newEnemyInstance() {
+        var enemy = {};
+        allEnemies.push(new Enemy());
+    }
+
+};
+
+enemyGenerator();
+
+var player = new Player(101 * 2, 83 * 5 - 30);
 
 
 
