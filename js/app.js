@@ -1,7 +1,22 @@
 // Enemies our player must avoid
 var Enemy = function() {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
+    this.x = -101;
+
+    // Roadsters start randomly at either y = 80, y = 160, y = 240.
+    var startLane = function(min, max) {
+      min = Math.ceil(min);
+      max = Math.floor(max);
+      var randNum = Math.floor(Math.random() * (max - min + 1)) + min;
+      if (randNum == 1) {
+          return 62;
+      } else if (randNum == 2) {
+          return 145;
+      } else if (randNum == 3) {
+          return 227;
+      }
+    }
+    this.y = startLane(1,3);
+    this.speed = Math.random() * 500;
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
@@ -14,7 +29,8 @@ Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
-};
+    this.x = this.x + (this.speed * dt);
+}
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
@@ -25,16 +41,24 @@ Enemy.prototype.render = function() {
 // This class requires an update(), render() and
 // a handleInput() method.
 var Player = function() {
-    this.update = function() {};
-    this.render = function() {};
-    this.handleInput = function() {};
+
+    this.sprite = 'images/char-horn-girl.png';
 }
+
+Player.prototype.update = function(dt) {};
+Player.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+Player.prototype.handleInput = function() {};
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
 var allEnemies = [];
-var player = new Player();
+var enemy = allEnemies.push(new Enemy());
+
+var player = new Player(300, 400);
+// player.render();
 
 
 // This listens for key presses and sends the keys to your
