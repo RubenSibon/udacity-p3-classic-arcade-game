@@ -1,11 +1,11 @@
 /* TO DO:
     - Add gems;
     - Add scoring;
-    - Add math functions for all moving objects;
     - Add levels that increase difficulty by:
-        - letting enenmies come from the left and the right,
+        - letting enemies come from the left and the right,
+        - letting enemies bounce off eachother when coming from different directions,
         - allowing for more enemies at a time,
-        - randomly generating them more often;
+        - randomly generating more enemies;
 */
 
 // Constants
@@ -53,17 +53,34 @@ function getRandomIntInclusive(min, max) {
 var GameObject = function() {};
 
 GameObject.prototype.render = function() {
+    if (player.countDown > 0 && player.levelWon === true) {
+        player.countDown--;
+        ctx.drawImage(Resources.get('images/Selector.png'), player.x, player.y);
+    } else if (player.countDown <= 0 && player.levelWon === true) {
+        player.levelWon = false;
+        player.countDown = 100;
+    }
+
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 
     // DEBUG: Draw rectangles around moving objects for collision debugging. Uncomment to show.
-    ctx.beginPath();
-    ctx.rect(this.x + this.x_offset, this.y + this.y_offset, this.width, this.height);
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = 'red';
-    ctx.stroke();
+    // ctx.beginPath();
+    // ctx.rect(this.x + this.x_offset, this.y + this.y_offset, this.width, this.height);
+    // ctx.lineWidth = 3;
+    // ctx.strokeStyle = 'red';
+    // ctx.stroke();
 };
 
 GameObject.prototype.update = function() {
+    if (player.countDown > 0 && player.levelInit === true) {
+        player.countDown--;
+        player.x = PLAYER_START_X;
+        player.y = PLAYER_START_Y;
+    } else if (player.countDown <= 0 && player.levelInit === true) {
+        player.levelInit = false;
+        player.countDown = 100;
+    }
+
     this.winLevel();
 };
 
@@ -81,10 +98,9 @@ RoadRunner.prototype.randomLane = function(min, max) {
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
-RoadRunner.prototype.update = function(dt) {
+RoadRunner.prototype.update = function(dt, playerObj) {
     this.checkCollision(player);
     this.purge();
-
     this.x = this.x + (this.speed * dt);
 }
 
@@ -98,14 +114,18 @@ var Enemy = function() {
     this.y_offset = BUG_Y_OFFSET;
     this.width = BUG_WIDTH;
     this.height = BUG_HEIGHT;
-    this.speed = 1; // Base speed
     // On level 1 bug speed is either 100 x 1, 1.5 or 2 depending on the lane.
-    if (this.lane === 1) {
+    switch(this.lane) {
+    case 1:
         this.speed = (0.5 + level) * 100;
-    } else if (this.lane === 2) {
+        break;
+    case 2:
         this.speed = (1 + level) * 100;
-    } else if (this.lane === 3) {
+        break;
+    case 3:
         this.speed = (0 + level) * 100;
+        break;
+    default: this.speed = 100;
     }
     this.sprite = 'images/enemy-bug.png';
 };
@@ -130,8 +150,8 @@ Enemy.prototype.checkCollision = function(playerObj) {
         (playerObj.y + playerObj.y_offset) < (this.y + this.y_offset) + BUG_HEIGHT &&
         PLAYER_HEIGHT + (playerObj.y + playerObj.y_offset) > (this.y + this.y_offset)) {
 
-            console.log("Player is hit! Reloading...");
-            window.setTimeout(player.reset, 200); // Slight timeout showing player that it was hit.
+            console.log("Vlogger is hit! Reloading...");
+            window.setTimeout(player.hurt(1), 750);
 
     }
 };
@@ -146,6 +166,10 @@ var Player = function(x, y) {
     this.width = PLAYER_WIDTH;
     this.height = PLAYER_HEIGHT;
     this.sprite = 'images/char-boy.png';
+    this.maxHearts = 3;
+    this.hearts = this.maxHearts;
+    this.countDown = 200;
+    this.levelWon = false;
 }
 
 Player.prototype = Object.create(GameObject.prototype);
@@ -165,16 +189,37 @@ Player.prototype.handleInput = function(input) {
     }
 };
 
-Player.prototype.reset = function() {
-    player.x = PLAYER_START_X;
-    player.y = PLAYER_START_Y;
+Player.prototype.hurt = function(damage) {
+    this.hearts -= damage;
+    console.log("Hearts: " + this.hearts);
+    if (this.hearts <= 0) {
+        this.die();
+    } else {
+        this.restart();
+    }
+}
+
+Player.prototype.die = function() {
+    this.hearts = this.maxHearts;
+    console.log("Vlogger has been killed in action. Watich it now on Live Stream!");
+    console.log("Hearts: " + this.hearts);
+    window.setTimeout(this.restart(), 750);
+}
+
+Player.prototype.restart = function() {
+    this.levelInit = true;
+    this.x = PLAYER_START_X;
+    this.y = PLAYER_START_Y;
     allEnemies = [];
 }
 
 Player.prototype.winLevel = function() {
     if (this.y < TILE_HEIGHT * 0) {
-        console.log("You reached the river!")
-        window.setTimeout(Engine.reset, 500);
+        this.levelWon = true;
+        console.log("Vlogger reached the river!");
+        this.hearts = this.maxHearts;
+        console.log("Hearts: " + player.hearts);
+        this.restart();
     }
 }
 
@@ -196,12 +241,12 @@ var allEnemies = [];
     }
 }());
 
-
-var player = new Player(PLAYER_START_X, PLAYER_START_Y);
-
 allEnemies.forEach(function(enemy) {
     enemy.update(player);
 });
+
+
+var player = new Player(PLAYER_START_X, PLAYER_START_Y);
 
 
 // This listens for key presses and sends the keys to your
