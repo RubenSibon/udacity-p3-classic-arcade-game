@@ -23,10 +23,11 @@ var BUG_X_OFFSET = 15;
 var BUG_Y_OFFSET = 80;
 
 
-// Game object so to allow for scoring and levels. At a later point the game's state could be saved (TO DO).
-var level = 1; // Level number is also the difficulty parameter.
+// TO DO: Game object so to allow for scoring and levels. At a later point the game's state could be saved (TO DO).
+var level = 1; // Level number is also a difficulty parameter.
 var score = 0;
 
+// TO DO: Function for completing a level.
 // var winLevel = function() {
 //     window.score += this.level;
 //     window.level++;
@@ -62,7 +63,9 @@ GameObject.prototype.render = function() {
     ctx.stroke();
 };
 
-GameObject.prototype.update = function() {};
+GameObject.prototype.update = function() {
+    this.winLevel();
+};
 
 
 // Super class for all objects that move over the road. A sub class of GameObject.
@@ -163,9 +166,16 @@ Player.prototype.handleInput = function(input) {
 };
 
 Player.prototype.reset = function() {
-    allEnemies = [];
     player.x = PLAYER_START_X;
     player.y = PLAYER_START_Y;
+    allEnemies = [];
+}
+
+Player.prototype.winLevel = function() {
+    if (this.y < TILE_HEIGHT * 0) {
+        console.log("You reached the river!")
+        window.setTimeout(Engine.reset, 500);
+    }
 }
 
 
@@ -185,6 +195,7 @@ var allEnemies = [];
         }
     }
 }());
+
 
 var player = new Player(PLAYER_START_X, PLAYER_START_Y);
 
