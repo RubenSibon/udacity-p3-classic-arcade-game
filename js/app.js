@@ -31,7 +31,7 @@ var score = 0;
 // var winLevel = function() {
 //     window.score += this.level;
 //     window.level++;
-//     reset();
+//     loadNextLevel();
 // }
 
 
@@ -203,14 +203,7 @@ Player.prototype.die = function() {
     this.hearts = this.maxHearts;
     console.log("Vlogger has been killed in action. Watich it now on Live Stream!");
     console.log("Hearts: " + this.hearts);
-    window.setTimeout(this.restart(), 750);
-}
-
-Player.prototype.restart = function() {
-    this.levelInit = true;
-    this.x = PLAYER_START_X;
-    this.y = PLAYER_START_Y;
-    allEnemies = [];
+    window.setTimeout(this.restart(), 750); // TO DO: Show GAME OVER screen.
 }
 
 Player.prototype.winLevel = function() {
@@ -219,8 +212,15 @@ Player.prototype.winLevel = function() {
         console.log("Vlogger reached the river!");
         this.hearts = this.maxHearts;
         console.log("Hearts: " + player.hearts);
-        this.restart();
+        this.restart(); // TO DO: Advance to next level.
     }
+}
+
+Player.prototype.restart = function() {
+    this.levelInit = true;
+    this.x = PLAYER_START_X;
+    this.y = PLAYER_START_Y;
+    allEnemies = [];
 }
 
 
