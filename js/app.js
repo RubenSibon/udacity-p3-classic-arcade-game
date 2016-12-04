@@ -63,7 +63,7 @@ Hud.prototype.renderScore = function() {
 };
 
 // Two random number generators. Possibly move into separate library later.
-// Source: MDN, https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+// Source: MDN (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random)
 // A: Get a floating point number between two values (excluding max value).
 function getRandomArbitrary (min, max) {return Math.random() * (max - min) + min;}
 
@@ -74,7 +74,7 @@ function getRandomIntInclusive (min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// Define primal game object that has base properties.
+// Define primal game object that has the base properties.
 var GameObject = function(x, y, xoffset, yoffset, width, height) {
     this.x = x;
     this.y = y;
@@ -84,7 +84,7 @@ var GameObject = function(x, y, xoffset, yoffset, width, height) {
     this.height = height;
 };
 
-// Increase score and remove gem once touched.
+// Increase score and remove gem once touched by a character.
 GameObject.prototype.collectGem = function(theGem, variant) {
     var i = allGems.indexOf(theGem);
     if (i !== -1) {
@@ -129,11 +129,10 @@ GameObject.prototype.update = function(dt) {
     }
 };
 
-// Prototypal object for all objects that move over the road.
+// Prototypal object for all things that move over the road. Inherits from and extends GameObject.
 var Vehicle = function() {
     GameObject.call(this, x, y, xoffset, yoffset, width, height);
 };
-
 Vehicle.prototype = Object.create(GameObject.prototype);
 
 // Vehicles start randomly at either one of three lanes on the y-axis.
@@ -175,7 +174,7 @@ Vehicle.prototype.checkCollision = function(playerObj) {
     }
 };
 
-// Remove Vehicles like enemy bugs and gems from the array once outside of map.
+// Remove vehicles like enemy bugs and gems from the array once outside of map.
 Vehicle.prototype.purge = function(typeOfVehicle) {
     if (this.x > 100 * 6 || this.x < -101) {
         var i = typeOfVehicle.indexOf(this);
@@ -194,16 +193,15 @@ Vehicle.prototype.update = function(dt, playerObj) {
     this.laneDir(dt);
 };
 
-// Enemies our player must avoid. A sub class of Vehicle.
+// Enemies our player must avoid. Inherits from and extends Vehicle.
 var Enemy = function(type, variant, x, y, xoffset, yoffset, width, height, dir) {
-    GameObject.call(this, x, y, xoffset, yoffset, width, height);
     this.type = type;
     this.variant = variant;
+    GameObject.call(this, x, y, xoffset, yoffset, width, height);
     this.dir = dir;
     this.speed = this.speedCalc(); // 1, 1.5 or 2
     this.sprite = 'images/enemy-bug.png';
 };
-
 Enemy.prototype = Object.create(Vehicle.prototype);
 
 // On level 1 bug speed is either 100 x 1, 1.5 or 2 depending on the lane.
@@ -222,8 +220,8 @@ Enemy.prototype.speedCalc = function() {
     }
 };
 
+// Gems our player may collect. Inherits from and extends Vehicle.
 var Gem = function(type, variant, x, y, xoffset, yoffset, width, height, dir) {
-    // Decide starting lane randomly for each gem.
     this.type = type;
     this.variant = variant;
     GameObject.call(this, x, y, xoffset, yoffset, width, height);
@@ -231,17 +229,17 @@ var Gem = function(type, variant, x, y, xoffset, yoffset, width, height, dir) {
     this.speed = 200;
     this.sprite = 'images/Gem Blue.png';
 };
-
 Gem.prototype = Object.create(Vehicle.prototype);
 
-// Player object
+// Player object. Inherits from and extends GameObject.
+// Has various methods that deal with the result of collision or position events.
+// The method's names are straightforward and are self-explanatory.
 var Player = function(x, y, xoffset, yoffset, width, height) {
     GameObject.call(this, x, y, xoffset, yoffset, width, height);
     this.sprite = 'images/char-boy.png';
     this.maxHearts = 3;
     this.hearts = this.maxHearts;
 };
-
 Player.prototype = Object.create(GameObject.prototype);
 
 Player.prototype.handleInput = function(input) {
@@ -301,7 +299,7 @@ var player = new Player(
 
 // Produce new enemy and gem instances periodically up to a maximum number.
 (function() {
-    // Spawn 3 bugs randomly on the roads at start to prevent player rushing.
+    // Spawn 3 bugs randomly on the roads at start to prevent player rushing to goal.
     for (var e = 0; e < 3; e++) {
         var spawnX = window.getRandomArbitrary(-101, 401);
         var spawnY = Enemy.prototype.laneLogic();
