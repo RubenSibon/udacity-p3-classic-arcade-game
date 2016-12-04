@@ -125,7 +125,7 @@ GameObject.prototype.render = function() {
         ctx.font = 'italic 32px Georgia, serif';
         ctx.fillStyle = 'gold';
         ctx.fillText('We have a wet vlogger!', 60, 450);
-        ctx.fillText('Worth millions new followers!', 10, 500);
+        ctx.fillText('Worth millions of viewers!', 40, 500);
     }
 
     // DEBUG CODE: Draw rectangles around objects for collision debugging. Uncomment to show.
