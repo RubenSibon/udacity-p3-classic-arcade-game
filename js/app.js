@@ -30,11 +30,12 @@ var GEM_BOX_WIDTH = 100;
 var GEM_BOX_HEIGHT = 100;
 
 var level = 1;
+var levelWin = false;
 var score = 0;
 
 // Global functions
 // Set player character back to start position and remove all other objects.
-var restart = function() {
+var restart = function(changeScore) {
     player.x = PLAYER_START_X;
     player.y = PLAYER_START_Y;
     allGems = [];
@@ -53,8 +54,9 @@ var increaseScore = function(ammount) {
 
 // TO DO: Create HUD to display life and gems of player.
 var Hud = function() {};
-Hud.prototype.displayHearts = function() {};
-Hud.prototype.displayGems = function() {};
+Hud.prototype.renderHearts = function() {};
+Hud.prototype.renderScore = function() {
+};
 
 // Two random number generators. Possibly move into separate library later.
 // Source: MDN, https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
@@ -93,6 +95,21 @@ GameObject.prototype.collectGem = function(theGem, variant) {
 GameObject.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 
+    ctx.font = 'italic 24px Sans-serif';
+    ctx.fillStyle = 'black';
+    ctx.fillText('Score : ' + window.score, 10, 30);
+
+    ctx.font = 'italic 24px Sans-serif';
+    ctx.fillStyle = 'red';
+    ctx.fillText('Hearts : ' + player.hearts, 311, 30);
+
+    if (levelWin === true) {
+        ctx.font = 'italic 32px Georgia, serif';
+        ctx.fillStyle = 'gold';
+        ctx.fillText('We have a wet vlogger!', 60, 450);
+        ctx.fillText('Worth millions new followers!', 10, 500);
+    }
+
     // DEBUG CODE: Draw rectangles around objects for collision debugging. Uncomment to show.
     // ctx.beginPath();
     // ctx.rect(this.x + this.x_offset, this.y + this.y_offset, this.width, this.height);
@@ -101,33 +118,33 @@ GameObject.prototype.render = function() {
     // ctx.stroke();
 };
 
-GameObject.prototype.update = function() {
+GameObject.prototype.update = function(dt) {
     // Complete level condition.
     if (player.y < TILE_HEIGHT * 0) {
-        window.setTimeout(player.winLevel, 1000);
+        player.winLevel();
     }
 };
 
 // Prototypal object for all objects that move over the road.
-var RoadRunner = function() {
+var Vehicle = function() {
     GameObject.call(this, x, y, xoffset, yoffset, width, height);
 };
 
-RoadRunner.prototype = Object.create(GameObject.prototype);
+Vehicle.prototype = Object.create(GameObject.prototype);
 
-// RoadRunners start randomly at either one of three lanes on the y-axis.
-RoadRunner.prototype.randomLane = function(min, max) {
+// Vehicles start randomly at either one of three lanes on the y-axis.
+Vehicle.prototype.randomLane = function(min, max) {
     var randomRow = getRandomIntInclusive(min, max);
     return randomRow;
 };
 
-RoadRunner.prototype.laneLogic = function() {
-    this.lane = RoadRunner.prototype.randomLane(1, 3); // Decide starting lane randomly.
+Vehicle.prototype.laneLogic = function() {
+    this.lane = Vehicle.prototype.randomLane(1, 3); // Decide starting lane randomly.
     var startLane = TILE_HEIGHT * this.lane - 20;
     return startLane;
 }
 
-RoadRunner.prototype.laneDir = function(dt) {
+Vehicle.prototype.laneDir = function(dt) {
     switch (this.dir) {
     case 'ltr':
         this.x = this.x + (this.speed * dt);
@@ -143,7 +160,7 @@ RoadRunner.prototype.laneDir = function(dt) {
     }
 }
 
-RoadRunner.prototype.checkCollision = function(playerObj) {
+Vehicle.prototype.checkCollision = function(playerObj) {
     if ((playerObj.x + playerObj.x_offset) < (this.x + this.x_offset) + this.width &&
         (playerObj.x + playerObj.x_offset) + player.width > (this.x + this.x_offset) &&
         (playerObj.y + playerObj.y_offset) < (this.y + this.y_offset) + this.height &&
@@ -156,26 +173,26 @@ RoadRunner.prototype.checkCollision = function(playerObj) {
     }
 };
 
-// Remove RoadRunners like enemy bugs and gems from the array once outside of map.
-RoadRunner.prototype.purge = function(typeOfRunner) {
+// Remove Vehicles like enemy bugs and gems from the array once outside of map.
+Vehicle.prototype.purge = function(typeOfVehicle) {
     if (this.x > 100 * 6 || this.x < -101) {
-        var i = typeOfRunner.indexOf(this);
+        var i = typeOfVehicle.indexOf(this);
         if (i !== -1) {
-            typeOfRunner.splice(i, 1);
+            typeOfVehicle.splice(i, 1);
         }
     }
 };
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
-RoadRunner.prototype.update = function(dt, playerObj) {
+Vehicle.prototype.update = function(dt, playerObj) {
     this.checkCollision(player);
     this.purge(allEnemies);
     this.purge(allGems);
     this.laneDir(dt);
 };
 
-// Enemies our player must avoid. A sub class of RoadRunner.
+// Enemies our player must avoid. A sub class of Vehicle.
 var Enemy = function(type, variant, x, y, xoffset, yoffset, width, height, dir) {
     GameObject.call(this, x, y, xoffset, yoffset, width, height);
     this.type = type;
@@ -185,26 +202,21 @@ var Enemy = function(type, variant, x, y, xoffset, yoffset, width, height, dir) 
     this.sprite = 'images/enemy-bug.png';
 };
 
-Enemy.prototype = Object.create(RoadRunner.prototype);
+Enemy.prototype = Object.create(Vehicle.prototype);
 
 // On level 1 bug speed is either 100 x 1, 1.5 or 2 depending on the lane.
 Enemy.prototype.speedCalc = function() {
-    switch (this.lane) {
-    case 1:
+    if (this.y === TILE_HEIGHT * 1 - 20) {
         this.speed = (1.5) * 100;
         return this.speed;
-        break;
-    case 2:
+    } else if (this.y ===  TILE_HEIGHT * 2 - 20) {
         this.speed = (2) * 100;
         return this.speed;
-        break;
-    case 3:
+    } else if (this.y ===  TILE_HEIGHT * 3 - 20) {
         this.speed = (1) * 100;
         return this.speed;
-        break;
-    default:
-        this.speed = 100;
-        return this.speed;
+    } else {
+        return 100;
     }
 }
 
@@ -218,7 +230,7 @@ var Gem = function(type, variant, x, y, xoffset, yoffset, width, height, dir) {
     this.sprite = 'images/Gem Blue.png';
 };
 
-Gem.prototype = Object.create(RoadRunner.prototype);
+Gem.prototype = Object.create(Vehicle.prototype);
 
 // Player object
 var Player = function(x, y, xoffset, yoffset, width, height) {
@@ -267,8 +279,9 @@ Player.prototype.die = function() {
 };
 
 Player.prototype.winLevel = function() {
-    console.log('Vlogger reached the river!')
+    score++;
     this.hearts = this.maxHearts;
+    levelWin = true;
     restart(); // TO DO: Advance to next level.
 };
 
@@ -288,7 +301,7 @@ var player = new Player(
 (function() {
     // Spawn 3 bugs randomly on the roads at start to prevent player rushing.
     for (var e = 0; e < 3; e++) {
-        var spawnX = window.getRandomArbitrary(0, 401);
+        var spawnX = window.getRandomArbitrary(-101, 401);
         var spawnY = Enemy.prototype.laneLogic();
         var enemy = new Enemy(
             'Bug',
@@ -304,7 +317,7 @@ var player = new Player(
         allEnemies.push(enemy);
     }
 
-    var maxEnemyCount = Math.round(5 + (1 / 2)); // TO DO: replace "1" with level variable.
+    var maxEnemyCount = Math.round(6 + (1 / 2)); // TO DO: replace "1" with level variable.
     var maxGemCount = 2;
 
     window.setInterval(newEnemyInstance, 800);
@@ -316,7 +329,7 @@ var player = new Player(
                 'Bug',
                 'Red',
                 -101,
-                RoadRunner.prototype.laneLogic(),
+                Vehicle.prototype.laneLogic(),
                 BUG_BOX_X_OFFSET,
                 BUG_BOX_Y_OFFSET,
                 BUG_BOX_WIDTH,
@@ -336,7 +349,7 @@ var player = new Player(
                 'Gem',
                 'Blue',
                 MAP_WIDTH,
-                RoadRunner.prototype.laneLogic(),
+                Vehicle.prototype.laneLogic(),
                 GEM_BOX_X_OFFSET,
                 GEM_BOX_Y_OFFSET,
                 GEM_BOX_WIDTH,
