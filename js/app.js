@@ -1,11 +1,14 @@
 /* TO DO:
-    - Add gems;
-    - Add scoring;
+    - Add HUD with heart en gem icons.
+    - Add three different gems types with varying values.
+    - Animate player when hurt (fade in-out) and dying (turn 90 degrees).
     - Add levels that increase difficulty by:
-        - letting enemies come from the left and the right,
-        - letting enemies bounce off eachother when coming from different directions,
+        - bigger and varying maps,
+        - letting enemies come from left and right,
         - allowing for more enemies at a time,
         - randomly generating more enemies;
+    - Add START screen with character select.
+    - Add GAME OVER screen.
 */
 
 // Constants
@@ -29,13 +32,14 @@ var GEM_BOX_Y_OFFSET = 60;
 var GEM_BOX_WIDTH = 100;
 var GEM_BOX_HEIGHT = 100;
 
+// Global variables
 var level = 1;
 var levelWin = false;
 var score = 0;
 
 // Global functions
 // Set player character back to start position and remove all other objects.
-var restart = function(changeScore) {
+var restart = function() {
     player.x = PLAYER_START_X;
     player.y = PLAYER_START_Y;
     allGems = [];
@@ -44,13 +48,13 @@ var restart = function(changeScore) {
 var advanceLevel = function() {
     // TO DO: Advance to next level logic.
     level ++;
-}
+};
 
 var increaseScore = function(ammount) {
     // TO DO: Display score on HUD. For log to console.
     score += ammount;
     console.log('Score: ' + score);
-}
+};
 
 // TO DO: Create HUD to display life and gems of player.
 var Hud = function() {};
@@ -142,23 +146,21 @@ Vehicle.prototype.laneLogic = function() {
     this.lane = Vehicle.prototype.randomLane(1, 3); // Decide starting lane randomly.
     var startLane = TILE_HEIGHT * this.lane - 20;
     return startLane;
-}
+};
 
 Vehicle.prototype.laneDir = function(dt) {
     switch (this.dir) {
     case 'ltr':
         this.x = this.x + (this.speed * dt);
         return this.x;
-        break;
     case 'rtl':
         this.x = this.x - (this.speed * dt);
         return this.x;
-        break;
     default:
         this.x = this.x + (this.speed * dt);
         return this.x;
     }
-}
+};
 
 Vehicle.prototype.checkCollision = function(playerObj) {
     if ((playerObj.x + playerObj.x_offset) < (this.x + this.x_offset) + this.width &&
@@ -218,7 +220,7 @@ Enemy.prototype.speedCalc = function() {
     } else {
         return 100;
     }
-}
+};
 
 var Gem = function(type, variant, x, y, xoffset, yoffset, width, height, dir) {
     // Decide starting lane randomly for each gem.
