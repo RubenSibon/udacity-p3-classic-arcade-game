@@ -1,4 +1,4 @@
-/* TO DO:
+/* TODO:
     - Add HUD with heart en gem icons.
     - Add three different gems types with varying values.
     - Animate player when hurt (fade in-out) and dying (turn 90 degrees).
@@ -11,15 +11,16 @@
     - Add GAME OVER screen.
 */
 
-// Constants
-// Coordinate offsets are used to calculate top left corner of sprite bounding boxes.
+/**
+ * Constants
+ */
 var MAP_WIDTH = 505;
 var MAP_HEIGHT = 606;
 var TILE_WIDTH = 101;
 var TILE_HEIGHT = 83;
 var PLAYER_START_X = 101 * 2;
 var PLAYER_START_Y = 84 * 5 - 30;
-var PLAYER_BOX_X_OFFSET = 22;
+var PLAYER_BOX_X_OFFSET = 22; // Coordinate offsets define sprite bounding boxes.
 var PLAYER_BOX_Y_OFFSET = 85;
 var PLAYER_BOX_WIDTH = 58;
 var PLAYER_BOX_HEIGHT = 58;
@@ -32,10 +33,12 @@ var GEM_BOX_Y_OFFSET = 60;
 var GEM_BOX_WIDTH = 100;
 var GEM_BOX_HEIGHT = 100;
 
-// Global variables
-var level = 1;
+/**
+ * Global variables
+ */
+var gameLevel = 1;
 var levelWin = false;
-var score = 0;
+var gameScore = 0;
 
 // Global functions
 // Set player character back to start position and remove all other objects.
@@ -46,24 +49,26 @@ var restart = function() {
 };
 
 var advanceLevel = function() {
-    // TO DO: Advance to next level logic.
-    level ++;
+    // TODO: Advance to next level logic.
+    gameLevel ++;
 };
 
 var increaseScore = function(ammount) {
-    // TO DO: Display score on HUD. For log to console.
-    score += ammount;
-    console.log('Score: ' + score);
+    // TODO: Display score on HUD. For log to console.
+    gameScore += ammount;
+    console.log('Score: ' + gameScore);
 };
 
-// TO DO: Create HUD to display life and gems of player.
+// TODO: Create HUD to display life and gems of player.
 var Hud = function() {};
 Hud.prototype.renderHearts = function() {};
 Hud.prototype.renderScore = function() {
 };
 
-// Two random number generators. Possibly move into separate library later.
-// Source: MDN (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random)
+/**
+ * Two random number generators. Possibly move into separate library later.
+ * Source: MDN (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random)
+ */
 // A: Get a floating point number between two values (excluding max value).
 function getRandomArbitrary (min, max) {return Math.random() * (max - min) + min;}
 
@@ -74,7 +79,16 @@ function getRandomIntInclusive (min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// Define primal game object that has the base properties.
+/**
+ * @description Define primal game object that has the base properties.
+ * @constructor
+ * @param [number] x - The x coordinate of the object
+ * @param [number] y - The y coordinate of the object
+ * @param [number] xoffset - The left side of object's bounding box
+ * @param [number] yoffset - The top side of object's bounding box
+ * @param [number] width - The width of the object
+ * @param [number] height - The height of the object
+ */
 var GameObject = function(x, y, xoffset, yoffset, width, height) {
     this.x = x;
     this.y = y;
@@ -101,7 +115,7 @@ GameObject.prototype.render = function() {
 
     ctx.font = 'italic 24px Sans-serif';
     ctx.fillStyle = 'black';
-    ctx.fillText('Score : ' + window.score, 10, 30);
+    ctx.fillText('Score : ' + window.gameScore, 10, 30);
 
     ctx.font = 'italic 24px Sans-serif';
     ctx.fillStyle = 'red';
@@ -129,7 +143,11 @@ GameObject.prototype.update = function(dt) {
     }
 };
 
-// Prototypal object for all things that move over the road. Inherits from and extends GameObject.
+//
+/**
+ * @description Prototypal object for all things that move over the road. Inherits from and extends GameObject.
+ * @constructor
+ */
 var Vehicle = function() {
     GameObject.call(this, x, y, xoffset, yoffset, width, height);
 };
@@ -141,12 +159,14 @@ Vehicle.prototype.randomLane = function(min, max) {
     return randomRow;
 };
 
+// Return a random lane for object to travel on.
 Vehicle.prototype.laneLogic = function() {
     this.lane = Vehicle.prototype.randomLane(1, 3); // Decide starting lane randomly.
     var startLane = TILE_HEIGHT * this.lane - 20;
     return startLane;
 };
 
+// Return movement speed in accordance with lane. Each lane has it's own "speed limit".
 Vehicle.prototype.laneDir = function(dt) {
     switch (this.dir) {
     case 'ltr':
@@ -174,7 +194,7 @@ Vehicle.prototype.checkCollision = function(playerObj) {
     }
 };
 
-// Remove vehicles like enemy bugs and gems from the array once outside of map.
+// Remove vehicles from the array once they have left the map.
 Vehicle.prototype.purge = function(typeOfVehicle) {
     if (this.x > 100 * 6 || this.x < -101) {
         var i = typeOfVehicle.indexOf(this);
@@ -184,8 +204,8 @@ Vehicle.prototype.purge = function(typeOfVehicle) {
     }
 };
 
-// Update the enemy's position, required method for game
-// Parameter: dt, a time delta between ticks
+// Update the enemy's position, required method for game.
+// Parameter: dt, a time delta between ticks.
 Vehicle.prototype.update = function(dt, playerObj) {
     this.checkCollision(player);
     this.purge(allEnemies);
@@ -193,7 +213,15 @@ Vehicle.prototype.update = function(dt, playerObj) {
     this.laneDir(dt);
 };
 
-// Enemies our player must avoid. Inherits from and extends Vehicle.
+/**
+ * @description Enemy prototype. Inherits from and extends Vehicle.
+ * @constructor
+ * @param [string] type - Type of enemy
+ * @param [string] variant - Variants of the enemy type
+ * @param [string] dir - Direction (ltr or rtl) that the enemy travels in
+ * @param [number] speed - Speed at which the enemy travels
+ * @param [string] sprite - Reference to the enemy's image
+ */
 var Enemy = function(type, variant, x, y, xoffset, yoffset, width, height, dir) {
     this.type = type;
     this.variant = variant;
@@ -207,20 +235,28 @@ Enemy.prototype = Object.create(Vehicle.prototype);
 // On level 1 bug speed is either 100 x 1, 1.5 or 2 depending on the lane.
 Enemy.prototype.speedCalc = function() {
     if (this.y === TILE_HEIGHT * 1 - 20) {
-        this.speed = (1.5) * 100;
+        this.speed = (0.5 + gameLevel) * 100;
         return this.speed;
     } else if (this.y ===  TILE_HEIGHT * 2 - 20) {
-        this.speed = (2) * 100;
+        this.speed = (1 + gameLevel) * 100;
         return this.speed;
     } else if (this.y ===  TILE_HEIGHT * 3 - 20) {
-        this.speed = (1) * 100;
+        this.speed = (1 + gameLevel) * 100;
         return this.speed;
     } else {
         return 100;
     }
 };
 
-// Gems our player may collect. Inherits from and extends Vehicle.
+/**
+ * @description Gem prototype. Inherits from and extends Vehicle.
+ * @constructor
+ * @param [string] type - Type of gem
+ * @param [string] variant - Variants of the gem type
+ * @param [string] dir - Direction (ltr or rtl) that the gem travels in
+ * @param [number] speed - Speed at which the gem travels
+ * @param [string] sprite - Reference to the gem's image
+ */
 var Gem = function(type, variant, x, y, xoffset, yoffset, width, height, dir) {
     this.type = type;
     this.variant = variant;
@@ -231,9 +267,15 @@ var Gem = function(type, variant, x, y, xoffset, yoffset, width, height, dir) {
 };
 Gem.prototype = Object.create(Vehicle.prototype);
 
-// Player object. Inherits from and extends GameObject.
-// Has various methods that deal with the result of collision or position events.
-// The method's names are straightforward and are self-explanatory.
+/**
+ * @description Player object. Inherits from and extends GameObject.
+ * Has various methods that deal with the result of collision or position events.
+ * The method's names are straightforward and quite self-explanatory.
+ * @constructor
+ * @param [string] sprite - Reference to the gem's image
+ * @param [number] maxHearts - Maximum ammount of hearts that player can have
+ * @param [number] hearts - Ammount of hearts that the player has
+ */
 var Player = function(x, y, xoffset, yoffset, width, height) {
     GameObject.call(this, x, y, xoffset, yoffset, width, height);
     this.sprite = 'images/char-boy.png';
@@ -273,16 +315,16 @@ Player.prototype.hurt = function(damage) {
 
 Player.prototype.die = function() {
     console.log('Vlogger has been killed in action. Watich it now on Live Stream!\n\nScore reset.');
-    score = 0;
+    gameScore = 0;
     this.hearts = this.maxHearts;
-    restart(); // TO DO: Show GAME OVER screen.
+    restart(); // TODO: Show GAME OVER screen.
 };
 
 Player.prototype.winLevel = function() {
-    score++;
+    gameScore++;
     this.hearts = this.maxHearts;
     levelWin = true;
-    restart(); // TO DO: Advance to next level.
+    restart(); // TODO: Advance to next level.
 };
 
 // Instantiate all game objects.
@@ -317,7 +359,7 @@ var player = new Player(
         allEnemies.push(enemy);
     }
 
-    var maxEnemyCount = Math.round(6 + (1 / 2)); // TO DO: replace "1" with level variable.
+    var maxEnemyCount = Math.round(6 + (1 / 2)); // TODO: replace "1" with level variable.
     var maxGemCount = 2;
 
     window.setInterval(newEnemyInstance, 800);
