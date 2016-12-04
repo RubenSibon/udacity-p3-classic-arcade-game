@@ -1,6 +1,6 @@
 # Vlogger (Classic Arcade Game Clone)
 
-In the never-ending hunt for more views and fame an ambitious vlogger tries the most daring thing yet: while holding a camcorder cross a busy road and jump into a river. Live! How can it possibly end well?
+In the never-ending hunt for more views and fame an ambitious vlogger tries the most daring thing yet: cross a busy road and jump into a river while vlogging about it. Live! How can it possibly end well?
 
 Test your reflexes and nerves in this HTML 5 Canvas game reboot of the classic arcade game [Frogger](https://en.wikipedia.org/wiki/Frogger), originally developed by [Konami](https://en.wikipedia.org/wiki/Konami) and distributed by [Sega](https://en.wikipedia.org/wiki/Sega) in 1981.
 
@@ -8,9 +8,9 @@ This game is far from finished and many ideas still need to be implemented. Stay
 
 ## How to run
 
-The game is to be hosted on github.io. Once that works you can simply visit an URL to start playing.
+The game is hosted on my [rubenjs7.github.io](https://rubenjs7.github.io/udacity-p4-classic-arcade-game/). Simply visit this URL to start playing.
 
-For now you may clone the GitHub repository and open the index.html file in your browser to start playing.
+You may also clone the GitHub repository and open the index.html file in your browser to start playing.
 
 ## How to play
 
