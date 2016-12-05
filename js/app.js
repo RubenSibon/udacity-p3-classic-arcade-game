@@ -1,15 +1,16 @@
-/* TODO:
-    - Add HUD with heart en gem icons.
-    - Add three different gems types with varying values.
-    - Animate player when hurt (fade in-out) and dying (turn 90 degrees).
-    - Add levels that increase difficulty by:
-        - bigger and varying maps,
-        - letting enemies come from left and right,
-        - allowing for more enemies at a time,
-        - randomly generating more enemies;
-    - Add START screen with character select.
-    - Add GAME OVER screen.
-*/
+/**
+ * TODO: Complete game with following features:
+ *  - Add HUD with heart en gem icons.
+ *  - Add three different gem types with varying values.
+ *  - Animate player when hurt (fade in-out) and dying (turn 90 degrees).
+ *  - Add levels that increase difficulty by:
+ *      - having bigger maps and different obstacles on it,
+ *      - letting enemies come from left and right,
+ *      - allowing for more enemies at a time,
+ *      - randomly generating more enemies;
+ *  - Add START screen with character select.
+ *  - Add GAME OVER screen.
+ */
 
 /**
  * Constants
@@ -40,7 +41,9 @@ var gameLevel = 1;
 var levelWin = false;
 var gameScore = 0;
 
-// Global functions
+/**
+ * Global functions
+ */
 // Set player character back to start position and remove all other objects.
 var restart = function() {
     player.x = PLAYER_START_X;
@@ -62,8 +65,7 @@ var increaseScore = function(ammount) {
 // TODO: Create HUD to display life and gems of player.
 var Hud = function() {};
 Hud.prototype.renderHearts = function() {};
-Hud.prototype.renderScore = function() {
-};
+Hud.prototype.renderScore = function() {};
 
 /**
  * Two random number generators. Possibly move into separate library later.
@@ -98,7 +100,7 @@ var GameObject = function(x, y, xoffset, yoffset, width, height) {
     this.height = height;
 };
 
-// Increase score and remove gem once touched by a character.
+// Increase score and remove collectibles (like gems) once touched by a character.
 GameObject.prototype.collectGem = function(theGem, variant) {
     var i = allGems.indexOf(theGem);
     if (i !== -1) {
@@ -270,7 +272,6 @@ Gem.prototype = Object.create(Vehicle.prototype);
 /**
  * @description Player object. Inherits from and extends GameObject.
  * Has various methods that deal with the result of collision or position events.
- * The method's names are straightforward and quite self-explanatory.
  * @constructor
  * @param [string] sprite - Reference to the gem's image
  * @param [number] maxHearts - Maximum ammount of hearts that player can have
@@ -359,7 +360,7 @@ var player = new Player(
         allEnemies.push(enemy);
     }
 
-    var maxEnemyCount = Math.round(6 + (1 / 2)); // TODO: replace "1" with level variable.
+    var maxEnemyCount = Math.round(6 + (gameLevel / 2));
     var maxGemCount = 2;
 
     window.setInterval(newEnemyInstance, 800);
