@@ -327,7 +327,7 @@ var Game = (function() {
 
     Player.prototype.die = function() {
         this.gameScore = 0;
-        sleep(1000);
+        sleep(2000);
         this.hearts = this.maxHearts;
         this.restart(); // TODO: Show GAME OVER screen.
     };
@@ -335,7 +335,7 @@ var Game = (function() {
     Player.prototype.winLevel = function() {
         this.levelWin = true;
         this.gameScore++;
-        sleep(3000);
+        sleep(2000);
         this.hearts = this.maxHearts;
         this.restart(); // TODO: Advance to next level.
     };
