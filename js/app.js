@@ -181,6 +181,22 @@ Vehicle.prototype.laneDir = function(dt) {
     }
 };
 
+// On level 1 bug speed is either 100 x 1, 1.5 or 2 depending on the lane.
+Vehicle.prototype.speedCalc = function() {
+    if (this.y === TILE_HEIGHT * 1 - 20) {
+        this.speed = (0.5 + gameLevel) * 100;
+        return this.speed;
+    } else if (this.y ===  TILE_HEIGHT * 2 - 20) {
+        this.speed = (1 + gameLevel) * 100;
+        return this.speed;
+    } else if (this.y ===  TILE_HEIGHT * 3 - 20) {
+        this.speed = (1 + gameLevel) * 100;
+        return this.speed;
+    } else {
+        return 100;
+    }
+};
+
 Vehicle.prototype.checkCollision = function(playerObj) {
     if ((playerObj.x + playerObj.x_offset) < (this.x + this.x_offset) + this.width &&
         (playerObj.x + playerObj.x_offset) + player.width > (this.x + this.x_offset) &&
@@ -231,22 +247,6 @@ var Enemy = function(type, variant, x, y, xoffset, yoffset, width, height, dir) 
     this.sprite = 'images/enemy-bug.png';
 };
 Enemy.prototype = Object.create(Vehicle.prototype);
-
-// On level 1 bug speed is either 100 x 1, 1.5 or 2 depending on the lane.
-Enemy.prototype.speedCalc = function() {
-    if (this.y === TILE_HEIGHT * 1 - 20) {
-        this.speed = (0.5 + gameLevel) * 100;
-        return this.speed;
-    } else if (this.y ===  TILE_HEIGHT * 2 - 20) {
-        this.speed = (1 + gameLevel) * 100;
-        return this.speed;
-    } else if (this.y ===  TILE_HEIGHT * 3 - 20) {
-        this.speed = (1 + gameLevel) * 100;
-        return this.speed;
-    } else {
-        return 100;
-    }
-};
 
 /**
  * @description Gem prototype. Inherits from and extends Vehicle.
