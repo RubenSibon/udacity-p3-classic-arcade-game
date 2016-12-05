@@ -1,3 +1,5 @@
+(function() {'use strict';
+
 /**
  * TODO: Complete game with following features:
  *  - Add HUD with heart en gem icons.
@@ -59,7 +61,7 @@ function advanceLevel() {
 function increaseScore(ammount) {
     // TODO: Display score on HUD. For log to console.
     gameScore += ammount;
-    console.log('Score: ' + gameScore);
+    // console.log('Score: ' + gameScore);
 };
 
 // Halts synchronous execution for given time in milliseconds.
@@ -125,7 +127,7 @@ GameObject.prototype.render = function() {
 
     ctx.font = 'italic 24px Sans-serif';
     ctx.fillStyle = 'black';
-    ctx.fillText('Score : ' + window.gameScore, 10, 30);
+    ctx.fillText('Score : ' + gameScore, 10, 30);
 
     ctx.font = 'italic 24px Sans-serif';
     ctx.fillStyle = 'red';
@@ -307,7 +309,7 @@ Player.prototype.handleInput = function(input) {
 
 Player.prototype.hurt = function(damage) {
     player.hearts -= damage;
-    console.log('Hearts: ' + player.hearts);
+    // console.log('Hearts: ' + player.hearts);
     if (player.hearts <= 0) {
         player.die();
     } else {
@@ -316,7 +318,7 @@ Player.prototype.hurt = function(damage) {
 };
 
 Player.prototype.die = function() {
-    console.log('Vlogger has been killed in action. Watich it now on Live Stream!\n\nScore reset.');
+    // console.log('Vlogger has been killed in action. Watich it now on Live Stream!\n\nScore reset.');
     gameScore = 0;
     this.hearts = this.maxHearts;
     restart(); // TODO: Show GAME OVER screen.
@@ -354,7 +356,7 @@ var player = new Player(
 (function() {
     // Spawn 3 bugs randomly on the roads at start to prevent player rushing to goal.
     for (var e = 0; e < 3; e++) {
-        var spawnX = window.getRandomArbitrary(-101, 401);
+        var spawnX = getRandomArbitrary(-101, 401);
         var spawnY = Enemy.prototype.laneLogic();
         var enemy = new Enemy(
             'Bug',
@@ -373,8 +375,8 @@ var player = new Player(
     var maxEnemyCount = Math.round(6 + (gameLevel / 2));
     var maxGemCount = 2;
 
-    window.setInterval(newEnemyInstance, 800);
-    window.setInterval(newGemInstance, 2000);
+    setInterval(newEnemyInstance, 800);
+    setInterval(newGemInstance, 2000);
 
     function newEnemyInstance () {
         if (allEnemies.length < maxEnemyCount) {
@@ -427,3 +429,13 @@ document.addEventListener('keyup', function(e) {
 
     player.handleInput(allowedKeys[e.keyCode]);
 });
+
+
+
+/* Assign the instantiated objects to the global variable so that
+ * they can be accessed by the engine.js script.
+ */
+window.allEnemies = allEnemies;
+window.allGems = allGems;
+window.player = player;
+})();
