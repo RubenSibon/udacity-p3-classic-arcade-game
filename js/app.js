@@ -17,31 +17,31 @@
 /**
  * Constants
  */
-var MAP_WIDTH = 505;
-var MAP_HEIGHT = 606;
-var TILE_WIDTH = 101;
-var TILE_HEIGHT = 83;
-var PLAYER_START_X = 101 * 2;
-var PLAYER_START_Y = 84 * 5 - 30;
-var PLAYER_BOX_X_OFFSET = 22; // Coordinate offsets define sprite bounding boxes.
-var PLAYER_BOX_Y_OFFSET = 85;
-var PLAYER_BOX_WIDTH = 58;
-var PLAYER_BOX_HEIGHT = 58;
-var BUG_BOX_X_OFFSET = 15;
-var BUG_BOX_Y_OFFSET = 80;
-var BUG_BOX_WIDTH = 80;
-var BUG_BOX_HEIGHT = 64;
-var GEM_BOX_X_OFFSET = 0;
-var GEM_BOX_Y_OFFSET = 60;
-var GEM_BOX_WIDTH = 100;
-var GEM_BOX_HEIGHT = 100;
+var MAP_WIDTH = 505,
+    MAP_HEIGHT = 606,
+    TILE_WIDTH = 101,
+    TILE_HEIGHT = 83,
+    PLAYER_START_X = 101 * 2,
+    PLAYER_START_Y = 84 * 5 - 30,
+    PLAYER_BOX_X_OFFSET = 22, // Coordinate offsets define sprite bounding boxes.
+    PLAYER_BOX_Y_OFFSET = 85,
+    PLAYER_BOX_WIDTH = 58,
+    PLAYER_BOX_HEIGHT = 58,
+    BUG_BOX_X_OFFSET = 15,
+    BUG_BOX_Y_OFFSET = 80,
+    BUG_BOX_WIDTH = 80,
+    BUG_BOX_HEIGHT = 64,
+    GEM_BOX_X_OFFSET = 0,
+    GEM_BOX_Y_OFFSET = 60,
+    GEM_BOX_WIDTH = 100,
+    GEM_BOX_HEIGHT = 100;
 
 /**
  * Global variables
  */
-var gameLevel = 1;
-var levelWin = false;
-var gameScore = 0;
+var gameLevel = 1,
+    levelWin = false,
+    gameScore = 0;
 
 /**
  * Global functions
@@ -341,9 +341,9 @@ Player.prototype.update = function(dt) {
 };
 
 // Instantiate all game objects.
-var allEnemies = [];
-var allGems = [];
-var player = new Player(
+var allEnemies = [],
+    allGems = [],
+    player = new Player(
     PLAYER_START_X,
     PLAYER_START_Y,
     PLAYER_BOX_X_OFFSET,
