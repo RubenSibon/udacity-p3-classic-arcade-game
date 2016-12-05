@@ -45,18 +45,18 @@ var gameScore = 0;
  * Global functions
  */
 // Set player character back to start position and remove all other objects.
-var restart = function() {
+function restart() {
     player.x = PLAYER_START_X;
     player.y = PLAYER_START_Y;
     allGems = [];
 };
 
-var advanceLevel = function() {
+function advanceLevel() {
     // TODO: Advance to next level logic.
     gameLevel ++;
 };
 
-var increaseScore = function(ammount) {
+function increaseScore(ammount) {
     // TODO: Display score on HUD. For log to console.
     gameScore += ammount;
     console.log('Score: ' + gameScore);
