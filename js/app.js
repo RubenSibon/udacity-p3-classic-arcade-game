@@ -62,6 +62,14 @@ var increaseScore = function(ammount) {
     console.log('Score: ' + gameScore);
 };
 
+// Halts synchronous execution for given time in milliseconds.
+// Contrast with built-in setTimeout function that runs asynchronously.
+function sleep(miliseconds) {
+    var currentTime = new Date().getTime();
+    while (currentTime + miliseconds >= new Date().getTime()) {
+    }
+}
+
 // TODO: Create HUD to display life and gems of player.
 var Hud = function() {};
 Hud.prototype.renderHearts = function() {};
@@ -136,13 +144,6 @@ GameObject.prototype.render = function() {
     // ctx.lineWidth = 3;
     // ctx.strokeStyle = 'red';
     // ctx.stroke();
-};
-
-GameObject.prototype.update = function(dt) {
-    // Complete level condition.
-    if (player.y < TILE_HEIGHT * 0) {
-        player.winLevel();
-    }
 };
 
 //
@@ -322,10 +323,19 @@ Player.prototype.die = function() {
 };
 
 Player.prototype.winLevel = function() {
-    gameScore++;
-    this.hearts = this.maxHearts;
     levelWin = true;
+    gameScore++;
+    sleep(3000);
+    this.hearts = this.maxHearts;
     restart(); // TODO: Advance to next level.
+};
+
+Player.prototype.update = function(dt) {
+    // Complete level condition.
+    if (this.y < TILE_HEIGHT * 0) {
+        // winLevel method is called after very brief timeout in order to let move animation continue.
+        setTimeout(this.winLevel, 10);
+    }
 };
 
 // Instantiate all game objects.
