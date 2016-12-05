@@ -8,11 +8,18 @@ var Game = (function() {
      *  - Animate player when hurt (fade in-out) and dying (turn 90 degrees).
      *  - Add levels that increase difficulty by:
      *      - having bigger maps and different obstacles on it,
-     *      - letting enemies come from left and right,
+     *      - making some levels time based,
+     *      - letting enemies also come from the right,
      *      - allowing for more enemies at a time,
      *      - randomly generating more enemies;
      *  - Add START screen with character select.
      *  - Add GAME OVER screen.
+     *  - Allow game to be saved (i.e. current level, score, life).
+     *  - Add highscoring.
+     *  - Make game mobile friendly:
+     *      - Allow listening for touch and swipe events,
+     *      - Add virtual arrow keys below map,
+     *      - Make it more responsive, especially for retina displays.
      */
 
     /**
@@ -23,10 +30,10 @@ var Game = (function() {
         NUM_ROWS = 6,
         NUM_COLS = 5,
         TILE_WIDTH = MAP_WIDTH / NUM_COLS, // 101
-        TILE_HEIGHT = MAP_HEIGHT / NUM_ROWS - 18, // 83 (minus 18 because of sprite overlap)
-        PLAYER_START_X = TILE_WIDTH * 2,
-        PLAYER_START_Y = TILE_HEIGHT * 5 - 30,
-        PLAYER_BOX_X_OFFSET = 22, // Coordinate offsets define sprite bounding boxes
+        TILE_HEIGHT = (MAP_HEIGHT - 101) / NUM_COLS - 18, // 83 (minus 18 because of sprite overlap)
+        PLAYER_START_X = TILE_WIDTH * 2, // Column 3
+        PLAYER_START_Y = TILE_HEIGHT * 5 - 30, // Row 6
+        PLAYER_BOX_X_OFFSET = 22, // Offsets define sprite bounding boxes' top left point
         PLAYER_BOX_Y_OFFSET = 85,
         PLAYER_BOX_WIDTH = 58,
         PLAYER_BOX_HEIGHT = 58,
@@ -34,50 +41,21 @@ var Game = (function() {
         BUG_BOX_Y_OFFSET = 80,
         BUG_BOX_WIDTH = 80,
         BUG_BOX_HEIGHT = 64,
-        GEM_BOX_X_OFFSET = 0,
-        GEM_BOX_Y_OFFSET = 60,
-        GEM_BOX_WIDTH = 100,
-        GEM_BOX_HEIGHT = 100;
+        GEM_BOX_X_OFFSET = 5,
+        GEM_BOX_Y_OFFSET = 65,
+        GEM_BOX_WIDTH = 90,
+        GEM_BOX_HEIGHT = 90;
 
-    /**
-     * Game variables
-     */
-    var gameLevel = 1,
-        levelWin = false,
-        gameScore = 0;
 
     /**
      * Game functions
      */
-    // Set player character back to start position and remove all other objects.
-    function restart() {
-        player.x = PLAYER_START_X;
-        player.y = PLAYER_START_Y;
-        allGems = [];
-    };
-
-    function advanceLevel() {
-        // TODO: Advance to next level logic.
-        gameLevel++;
-    };
-
-    function increaseScore(ammount) {
-        // TODO: Display score on HUD. For log to console.
-        gameScore += ammount;
-        // console.log('Score: ' + gameScore);
-    };
-
     // Halts synchronous execution for given time in milliseconds.
     // Contrast with built-in setTimeout function that runs asynchronously.
     function sleep(miliseconds) {
         var currentTime = new Date().getTime();
         while (currentTime + miliseconds >= new Date().getTime()) {}
     }
-
-    // TODO: Create HUD to display life and gems of player.
-    var Hud = function() {};
-    Hud.prototype.renderHearts = function() {};
-    Hud.prototype.renderScore = function() {};
 
     /**
      * Two random number generators. Possibly move into separate library later.
@@ -94,6 +72,15 @@ var Game = (function() {
         max = Math.floor(max);
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
+
+    /**
+     * @description Define Heads Up Display (HUD).
+     * @constructor
+     * TODO: Create HUD to display life and gems of player.
+     */
+    var Hud = function() {};
+    Hud.prototype.renderHearts = function() {};
+    Hud.prototype.renderScore = function() {};
 
     /**
      * @description Define primal game object that has the base properties.
@@ -114,30 +101,19 @@ var Game = (function() {
         this.height = height;
     };
 
-    // Increase score and remove collectibles (like gems) once touched by a character.
-    GameObject.prototype.collectGem = function(theGem, variant) {
-        var i = allGems.indexOf(theGem);
-        if (i !== -1) {
-            allGems.splice(i, 1);
-        }
-        if (variant === "Blue") {
-            increaseScore(1);
-        }
-    };
-
     // Rendering for ALL game objects (children of GameObject) happens here.
     GameObject.prototype.render = function() {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 
         ctx.font = 'italic 24px Sans-serif';
         ctx.fillStyle = 'black';
-        ctx.fillText('Score : ' + gameScore, 10, 30);
+        ctx.fillText('Score : ' + player.gameScore, 10, 30);
 
         ctx.font = 'italic 24px Sans-serif';
         ctx.fillStyle = 'red';
         ctx.fillText('Hearts : ' + player.hearts, 311, 30);
 
-        if (levelWin === true) {
+        if (player.levelWin === true) {
             ctx.font = 'italic 32px Georgia, serif';
             ctx.fillStyle = 'gold';
             ctx.fillText('We have a wet vlogger!', 60, 450);
@@ -161,6 +137,7 @@ var Game = (function() {
         GameObject.call(this, x, y, xoffset, yoffset, width, height);
     };
     Vehicle.prototype = Object.create(GameObject.prototype);
+    Vehicle.prototype.constructor = Vehicle;
 
     // Vehicles start randomly at either one of three lanes on the y-axis.
     Vehicle.prototype.randomLane = function(min, max) {
@@ -170,7 +147,7 @@ var Game = (function() {
 
     // Return a random lane for object to travel on.
     Vehicle.prototype.laneLogic = function() {
-        this.lane = Vehicle.prototype.randomLane(1, 3); // Decide starting lane randomly.
+        this.lane = this.randomLane(1, 3); // Decide starting lane randomly.
         var startLane = TILE_HEIGHT * this.lane - 20;
         return startLane;
     };
@@ -193,13 +170,13 @@ var Game = (function() {
     // On level 1 bug speed is either 100 x 1, 1.5 or 2 depending on the lane.
     Vehicle.prototype.speedCalc = function() {
         if (this.y === TILE_HEIGHT * 1 - 20) {
-            this.speed = (0.5 + gameLevel) * 100;
+            this.speed = (0.5 + player.gameLevel) * 100;
             return this.speed;
         } else if (this.y === TILE_HEIGHT * 2 - 20) {
-            this.speed = (1 + gameLevel) * 100;
+            this.speed = (1 + player.gameLevel) * 100;
             return this.speed;
         } else if (this.y === TILE_HEIGHT * 3 - 20) {
-            this.speed = (1 + gameLevel) * 100;
+            this.speed = (1 + player.gameLevel) * 100;
             return this.speed;
         } else {
             return 100;
@@ -208,13 +185,13 @@ var Game = (function() {
 
     Vehicle.prototype.checkCollision = function(playerObj) {
         if ((playerObj.x + playerObj.x_offset) < (this.x + this.x_offset) + this.width &&
-            (playerObj.x + playerObj.x_offset) + player.width > (this.x + this.x_offset) &&
+            (playerObj.x + playerObj.x_offset) + playerObj.width > (this.x + this.x_offset) &&
             (playerObj.y + playerObj.y_offset) < (this.y + this.y_offset) + this.height &&
-            player.width + (playerObj.y + playerObj.y_offset) > (this.y + this.y_offset)) {
+            playerObj.width + (playerObj.y + playerObj.y_offset) > (this.y + this.y_offset)) {
             if (this.type === "Bug") {
-                player.hurt(1);
+                playerObj.hurt(1);
             } else if (this.type === "Gem") {
-                GameObject.prototype.collectGem(this, this.variant);
+                playerObj.collectGem(this, this.variant);
             }
         }
     };
@@ -283,12 +260,20 @@ var Game = (function() {
      * @param [string] sprite - Reference to the gem's image
      * @param [number] maxHearts - Maximum ammount of hearts that player can have
      * @param [number] hearts - Ammount of hearts that the player has
+     * @param [number] gameLevel - What level is the player on?
+     * @param [boolean] levelWin - Has a level been won?
+     * @param [number] gameScore - What is the player score?
      */
     var Player = function(x, y, xoffset, yoffset, width, height) {
         GameObject.call(this, x, y, xoffset, yoffset, width, height);
         this.sprite = 'images/char-boy.png';
         this.maxHearts = 3;
         this.hearts = this.maxHearts;
+
+         // Game variables
+        this.gameLevel = 1;
+        this.levelWin = false;
+        this.gameScore = 0;
     };
     Player.prototype = Object.create(GameObject.prototype);
 
@@ -311,36 +296,65 @@ var Game = (function() {
         }
     };
 
+    // Set player character back to start position and remove all other objects.
+    Player.prototype.restart = function() {
+        this.x = PLAYER_START_X;
+        this.y = PLAYER_START_Y;
+        allGems = [];
+    };
+
+    // Increase score and remove collectibles (like gems) once touched by a character.
+    Player.prototype.collectGem = function(theGem, variant) {
+        var i = allGems.indexOf(theGem);
+        if (i !== -1) {
+            allGems.splice(i, 1);
+        }
+        if (variant === "Blue") {
+            this.increaseScore(1);
+        }
+    };
+
     Player.prototype.hurt = function(damage) {
-        player.hearts -= damage;
-        // console.log('Hearts: ' + player.hearts);
-        if (player.hearts <= 0) {
-            player.die();
+        this.hearts -= damage;
+        sleep(500);
+        // console.log('Hearts: ' + this.hearts);
+        if (this.hearts <= 0) {
+            this.die();
         } else {
-            restart();
+            this.restart();
         }
     };
 
     Player.prototype.die = function() {
-        // console.log('Vlogger has been killed in action. Watich it now on Live Stream!\n\nScore reset.');
-        gameScore = 0;
+        this.gameScore = 0;
+        sleep(1000);
         this.hearts = this.maxHearts;
-        restart(); // TODO: Show GAME OVER screen.
+        this.restart(); // TODO: Show GAME OVER screen.
     };
 
     Player.prototype.winLevel = function() {
-        levelWin = true;
-        gameScore++;
+        this.levelWin = true;
+        this.gameScore++;
         sleep(3000);
         this.hearts = this.maxHearts;
-        restart(); // TODO: Advance to next level.
+        this.restart(); // TODO: Advance to next level.
+    };
+
+    Player.prototype.advanceLevel = function() {
+        // TODO: Advance to next level logic.
+        this.gameLevel++;
+    };
+
+    Player.prototype.increaseScore = function(ammount) {
+        // TODO: Display score on HUD. For log to console.
+        this.gameScore += ammount;
+        // console.log('Score: ' + this.gameScore);
     };
 
     Player.prototype.update = function(dt) {
         // Complete level condition.
         if (this.y < TILE_HEIGHT * 0) {
-            // winLevel method is called after very brief timeout in order to let move animation continue.
-            setTimeout(this.winLevel, 10);
+            this.winLevel();
         }
     };
 
@@ -376,8 +390,8 @@ var Game = (function() {
             allEnemies.push(enemy);
         }
 
-        var maxEnemyCount = Math.round(6 + (gameLevel / 2));
-        var maxGemCount = 2;
+        var maxEnemyCount = Math.round(6 + (player.gameLevel / 2)),
+            maxGemCount = 2;
 
         setInterval(newEnemyInstance, 800);
         setInterval(newGemInstance, 2000);
