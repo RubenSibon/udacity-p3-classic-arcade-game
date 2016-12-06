@@ -22,9 +22,10 @@ var Game = (function() {
      *      - Make it more responsive, especially for retina displays.
      */
 
-    /**
-     * Game constants
-     */
+    //===================================
+    // CONSTANTS
+    //===================================
+
     var MAP_WIDTH = 505,
         MAP_HEIGHT = 606,
         NUM_ROWS = 6,
@@ -46,9 +47,10 @@ var Game = (function() {
         GEM_BOX_WIDTH = 90,
         GEM_BOX_HEIGHT = 90;
 
-    /**
-     * Game functions
-     */
+    //===================================
+    // GAME WIDE FUNCTIONS
+    //===================================
+
     // Halts synchronous execution for given time in milliseconds.
     // Contrast with built-in setTimeout function that runs asynchronously.
     function sleep(miliseconds) {
@@ -56,21 +58,21 @@ var Game = (function() {
         while (currentTime + miliseconds >= new Date().getTime()) {}
     }
 
-    /**
-     * Two random number generators. Possibly move into separate library later.
-     * Source: MDN (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random)
-     */
-    // A: Get a floating point number between two values (excluding max value).
+    // Random number generator A: get a floating point number between two values (excluding max value).
     function getRandomArbitrary(min, max) {
         return Math.random() * (max - min) + min;
     }
 
-    // B: Get an integer between and including two values.
+    // Random number generator B: get an integer between and including two values.
     function getRandomIntInclusive(min, max) {
         min = Math.ceil(min);
         max = Math.floor(max);
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
+
+    //===================================
+    // GAME CLASSES
+    //===================================
 
     /**
      * @description Define Heads Up Display (HUD).
@@ -126,14 +128,13 @@ var Game = (function() {
         ctx.shadowOffsetY = 0;
 
         // DEBUG CODE: Draw rectangles around objects for collision debugging. Uncomment to show.
-        ctx.beginPath();
-        ctx.rect(this.x + this.x_offset, this.y + this.y_offset, this.width, this.height);
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = 'red';
-        ctx.stroke();
+        // ctx.beginPath();
+        // ctx.rect(this.x + this.x_offset, this.y + this.y_offset, this.width, this.height);
+        // ctx.lineWidth = 3;
+        // ctx.strokeStyle = 'red';
+        // ctx.stroke();
     };
 
-    //
     /**
      * @description Prototypal object for all things that move over the road. Inherits from and extends GameObject.
      * @constructor
@@ -250,7 +251,8 @@ var Game = (function() {
      * @param [number] speed - Speed at which the gem travels
      * @param [string] sprite - Reference to the gem's image
      */
-    var Gem = function(type, variant, x, y, xoffset, yoffset, width, height, dir) {
+    var Gem = function( type, variant, x, y,
+                        xoffset, yoffset, width, height, dir) {
         this.type = type;
         this.variant = variant;
         GameObject.call(this, x, y, xoffset, yoffset, width, height);
@@ -310,7 +312,8 @@ var Game = (function() {
         allGems = [];
     };
 
-    // Increase score and remove collectibles (like gems) once touched by a character.
+    // Increase score and remove collectibles (like gems)
+    // once touched by a character.
     Player.prototype.collectGem = function(theGem, variant) {
         var i = allGems.indexOf(theGem);
         if (i !== -1) {
@@ -379,7 +382,8 @@ var Game = (function() {
 
     // Produce new enemy and gem instances periodically up to a maximum number.
     (function() {
-        // Spawn 3 bugs randomly on the roads at start to prevent player rushing to goal.
+        // Spawn 3 bugs randomly on the roads at start
+        // to prevent player rushing to goal.
         for (var e = 0; e < 3; e++) {
             var spawnX = getRandomArbitrary(-101, 401);
             var spawnY = Enemy.prototype.laneLogic();
@@ -455,9 +459,8 @@ var Game = (function() {
         player.handleInput(allowedKeys[e.keyCode]);
     });
 
-    /* Assign the instantiated objects to the global variable so that
-     * they can be accessed by the engine.js script.
-     */
+    // Assign the instantiated objects to the global variable so that
+    // they can be accessed by the engine.js script.
     window.allEnemies = allEnemies;
     window.allGems = allGems;
     window.player = player;
