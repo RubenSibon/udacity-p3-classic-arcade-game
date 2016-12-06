@@ -46,7 +46,6 @@ var Game = (function() {
         GEM_BOX_WIDTH = 90,
         GEM_BOX_HEIGHT = 90;
 
-
     /**
      * Game functions
      */
@@ -105,36 +104,44 @@ var Game = (function() {
     GameObject.prototype.render = function() {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 
-        ctx.font = 'italic 24px Sans-serif';
-        ctx.fillStyle = 'black';
-        ctx.fillText('Score : ' + player.gameScore, 10, 30);
+        ctx.font = 'italic 24px Bungee, cursive';
+        ctx.fillStyle = '#e2e';
+        ctx.shadowColor = 'black';
+        ctx.shadowBlur = 1;
+        ctx.shadowOffsetX = 4;
+        ctx.shadowOffsetY = 4;
+        ctx.fillText('Score : ' + player.gameScore, 11, 30);
 
-        ctx.font = 'italic 24px Sans-serif';
-        ctx.fillStyle = 'red';
-        ctx.fillText('Hearts : ' + player.hearts, 311, 30);
+        ctx.font = 'italic 24px Bungee, cursive';
+        ctx.fillStyle = '#d33';
+        ctx.fillText('Hearts : ' + player.hearts, 161, 30);
 
         if (player.levelWin === true) {
-            ctx.font = 'italic 32px Georgia, serif';
+            ctx.font = 'italic 28px Bungee, cursive';
             ctx.fillStyle = 'gold';
             ctx.fillText('We have a wet vlogger!', 60, 450);
-            ctx.fillText('Worth millions of viewers!', 40, 500);
+            ctx.fillText('Worth millions of views!', 35, 500);
         }
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
 
         // DEBUG CODE: Draw rectangles around objects for collision debugging. Uncomment to show.
-        // ctx.beginPath();
-        // ctx.rect(this.x + this.x_offset, this.y + this.y_offset, this.width, this.height);
-        // ctx.lineWidth = 3;
-        // ctx.strokeStyle = 'red';
-        // ctx.stroke();
+        ctx.beginPath();
+        ctx.rect(this.x + this.x_offset, this.y + this.y_offset, this.width, this.height);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'red';
+        ctx.stroke();
     };
 
     //
     /**
      * @description Prototypal object for all things that move over the road. Inherits from and extends GameObject.
      * @constructor
+     * @param [number] Lane of Vehicle instance
      */
     var Vehicle = function() {
         GameObject.call(this, x, y, xoffset, yoffset, width, height);
+        this.lane = 0;
     };
     Vehicle.prototype = Object.create(GameObject.prototype);
     Vehicle.prototype.constructor = Vehicle;
@@ -148,7 +155,7 @@ var Game = (function() {
     // Return a random lane for object to travel on.
     Vehicle.prototype.laneLogic = function() {
         this.lane = this.randomLane(1, 3); // Decide starting lane randomly.
-        var startLane = TILE_HEIGHT * this.lane - 20;
+        var startLane = TILE_HEIGHT * this.lane - 24;
         return startLane;
     };
 
@@ -390,14 +397,15 @@ var Game = (function() {
             allEnemies.push(enemy);
         }
 
-        var maxEnemyCount = Math.round(6 + (player.gameLevel / 2)),
+        var maxEnemyCount = Math.round(5 + (player.gameLevel / 2)),
             maxGemCount = 2;
 
         setInterval(newEnemyInstance, 800);
         setInterval(newGemInstance, 2000);
 
         function newEnemyInstance() {
-            if (allEnemies.length < maxEnemyCount) {
+            var enemyChance = getRandomIntInclusive(1, 4);
+            if (allEnemies.length < maxEnemyCount && enemyChance > 0 < 4) {
                 var enemy = new Enemy(
                     'Bug',
                     'Red', -101,
