@@ -8,8 +8,7 @@ This game is unfinished. Stay tuned for feature updates. But be warned that they
 
 ## How to run
 
-The game is hosted on my [rubenjs7.github.io](https://rjsibon.github.io/udacity-p3-classic-arcade-game
-/). Simply visit this URL to start playing.
+The game is hosted on my [rjsibon.github.io](https://rjsibon.github.io/udacity-p3-classic-arcade-game). Simply visit this URL to start playing.
 
 You may also clone the GitHub repository and open the index.html file in your browser to start playing.
 
