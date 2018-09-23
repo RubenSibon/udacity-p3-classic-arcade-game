@@ -4,17 +4,18 @@ In the never-ending hunt for more views and fame an ambitious vlogger tries the 
 
 Test your reflexes and nerves in this HTML 5 Canvas game reboot of the classic arcade game [Frogger](https://en.wikipedia.org/wiki/Frogger), originally developed by [Konami](https://en.wikipedia.org/wiki/Konami) and distributed by [Sega](https://en.wikipedia.org/wiki/Sega) in 1981.
 
-This game is far from finished and many ideas still need to be implemented. Stay tuned for feature updates.
+This game is unfinished. Stay tuned for feature updates. But be warned that they may never come. ;-)
 
 ## How to run
 
-The game is hosted on my [rubenjs7.github.io](https://rubenjs7.github.io/udacity-p4-classic-arcade-game/). Simply visit this URL to start playing.
+The game is hosted on my [rubenjs7.github.io](https://rjsibon.github.io/udacity-p3-classic-arcade-game
+/). Simply visit this URL to start playing.
 
 You may also clone the GitHub repository and open the index.html file in your browser to start playing.
 
 ## How to play
 
-Does a classic game like Vlogger really need an explanation? Well, here it is anyway.
+Does a classic game like (Fr)(Vl)ogger really need an explanation? Well, here it is anyway.
 
 The goal of the game is simple: get your character (Vlogger) safely in the river on the other side of the road.
 
