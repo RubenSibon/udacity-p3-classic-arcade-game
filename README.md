@@ -1,3 +1,5 @@
+## Udacity Frontend Nanodegree
+
 # Vlogger (Classic Arcade Game Clone)
 
 In the never-ending hunt for more views and fame an ambitious vlogger tries the most daring thing yet: cross a busy road and jump into a river while vlogging about it. Live! How can it possibly end well?
