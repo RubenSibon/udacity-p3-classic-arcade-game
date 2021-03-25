@@ -1,5 +1,7 @@
 ## Udacity Frontend Nanodegree
 
+Check out the [demo](https://rubensibon.github.io/udacity-p3-classic-arcade-game/).
+
 # Vlogger (Classic Arcade Game Clone)
 
 In the never-ending hunt for more views and fame an ambitious vlogger tries the most daring thing yet: cross a busy road and jump into a river while vlogging about it. Live! How can it possibly end well?
@@ -10,7 +12,7 @@ This game is unfinished. Stay tuned for feature updates. But be warned that they
 
 ## How to run
 
-The game is hosted on my [rjsibon.github.io](https://rjsibon.github.io/udacity-p3-classic-arcade-game). Simply visit this URL to start playing.
+The game is hosted on my [rjsibon.github.io](https://rubensibon.github.io/udacity-p3-classic-arcade-game/). Simply visit this URL to start playing.
 
 You may also clone the GitHub repository and open the index.html file in your browser to start playing.
 
